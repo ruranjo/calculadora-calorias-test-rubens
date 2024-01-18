@@ -34,36 +34,86 @@ function App() {
     updateDataInput(idMetric);
   },[value])
 
+  const functionKcal = (weight:number) =>{
+    console.log("///////////////////////////////////");
+    console.log(person);
+
+     let factor = 1.6;  // Menos de 165 lb (75 kg)
+    
+    if (weight >= 165 && weight < 200) {
+       factor = 1.4;
+     } else if (weight >= 200 && weight < 220) {
+       factor = 1.2;
+     } else {
+       factor = 1;  // Más de 220 lb (100 kg)
+     }
+
+     return (((10 * parseFloat(person.weight) + 6.25 * parseFloat(person.height )) - (10 * parseFloat(person.age)) + 5) * factor).toString();
+    }
+
   const calc = () => {
-    /*
-    4- Para el peso se debe manejar un valor mínimo o igual a 40.50 kg o 89.28722 lb y un valor máximo o
-      igual de 300 kg o 661.387 lb.
+    let auxPerson;
+    
+    if(parseFloat(person.age) < 16){
+      toast("The age must be greater or same than: 16 years old");
+      return
+    }
 
-      5- Para la altura un valor entre el rango de 1.40mts y de 2.25mts
-      6- El resultado se debe actualizar cuando se cambia cualquier valor ya sea: altura, peso o
-      edad.
-  7- Para la edad se debe validar un valor mínimo o igual de 16 y un valor máximo de 105
-    */
-
+    if(parseFloat(person.age) >= 105){
+      toast("The age must be less than: 105 years old");
+      return
+    }
+   
     if(theme === 1){//decimal
-      
+      auxPerson = convertUnits();
+
       if(parseFloat(person.weight) < 40.50){
-        const notify = () => toast("The weight must be greater or same than: 40.50kg!");
-        notify();
+        toast("The weight must be greater or same than: 40.50kg!");
         return
       }
 
       if(parseFloat(person.weight) >= 300){
-        const notify = () => toast("The weight must be less than: 300kg!");
-        notify();
+        toast("The weight must be less than: 300kg!");
         return
       }
 
+      if(parseFloat(person.height) <  140){
+        toast("The height must be greater or same than: 1.40m!");
+        return
+      }
+
+      if(parseFloat(person.height) >= 225){
+        toast("The height must be less than: 2.25m!");
+        return
+      }
+
+      setResult(functionKcal(parseFloat(auxPerson.weight)));
+      
     }else if(theme === 2){//imperial
 
+      if(parseFloat(person.weight) < 89.28){
+        toast("The weight must be greater or same than: 89.28lb!");
+        return
+      }
+
+      if(parseFloat(person.weight) >= 661.38){
+        toast("The weight must be less than: 661.38lb!");
+        return
+      }
+
+      if(parseFloat(person.height) < 55.11){
+        toast("The height must be greater or same than: 55.11 inch!");
+        return
+      }
+  
+      if(parseFloat(person.height) >= 88.58){
+        toast("The height must be less than: 88.58 ich!");
+        return
+      }
+
+      setResult(functionKcal(parseFloat(person.weight)));
     }
 
-    const notify = () => toast("Wow so easy!");
   }
 
   const convertUnits = () =>{
@@ -82,10 +132,10 @@ function App() {
         aux.weight = (2.20462 * parseFloat(aux.weight)).toFixed(2).toString();
         aux.height = (parseFloat(aux.height)/2.54).toFixed(2).toString();
     }else if(theme === 2){//imperial => decimal
-      aux.weight = (parseFloat(aux.weight) / 2.20462 ).toFixed(2).toString();
-      aux.height = (parseFloat(aux.height) * 2.54).toFixed(2).toString();
+        aux.weight = (parseFloat(aux.weight) / 2.20462 ).toFixed(2).toString();
+        aux.height = (parseFloat(aux.height) * 2.54).toFixed(2).toString();
     }
-    setPerson(aux);
+    return aux;
   }
   
   const updateDataInput = (index:number) => {
@@ -101,6 +151,12 @@ function App() {
     }
 
     setPerson(aux);
+  }
+
+  const changeInput = (index:number) => {
+    setIdMetric(index); 
+    setValue('');
+    updateDataInput(index);
   }
 
   const deleteValue = () => {
@@ -120,6 +176,8 @@ function App() {
   };
 
   const hadleTheme = () => {
+    const aux = convertUnits();
+    
 
     if (theme === 1) {
       setTheme(2);
@@ -129,7 +187,20 @@ function App() {
       setThemeValue("8%"); 
     }
 
-    convertUnits();
+    setPerson(aux);
+    
+  };
+
+  const resect = () => {
+    
+    setPerson({
+      age:"",
+      weight:"",
+      height:""
+    });
+    setValue("");
+    setResult("0");
+
   };
 
   return (
@@ -149,9 +220,9 @@ function App() {
           </WrapperSwitch>
         </Header>
 
-        <DisplayContainer> {idMetric === 0 ? <Ball/> : <Ball bg="var(--screen-background)"/> }  AGE<Input>{person.age}</Input></DisplayContainer>
-        <DisplayContainer> {idMetric === 1 ? <Ball/> : <Ball bg="var(--screen-background)"/> } WEIGHT<Input>{person.weight}</Input></DisplayContainer>
-        <DisplayContainer> {idMetric === 2 ? <Ball/> : <Ball bg="var(--screen-background)"/> } HEIGHT<Input>{person.height}</Input></DisplayContainer>
+        <DisplayContainer> {idMetric === 0 ? <Ball/> : <Ball bg="var(--screen-background)"/> } AGE<Input onClick={() => changeInput(0)} >{person.age}</Input></DisplayContainer>
+        <DisplayContainer> {idMetric === 1 ? <Ball/> : <Ball bg="var(--screen-background)"/> } WEIGHT<Input onClick={() => changeInput(1)}>{person.weight}</Input></DisplayContainer>
+        <DisplayContainer> {idMetric === 2 ? <Ball/> : <Ball bg="var(--screen-background)"/> } HEIGHT<Input onClick={() => changeInput(2)}>{person.height}</Input></DisplayContainer>
         <DisplayContainer> RESULT<Output>{result}</Output></DisplayContainer>
         
 
@@ -171,9 +242,9 @@ function App() {
           <Button onClick={() => value.length <= 12 && setValue(value + "6")}>6</Button>
           
           {idMetric === 0 ? 
-          <Button color={"var(--white)"} bg="var(--key-background-red)"  bdbox="var(--key-shadow-dark-red)" onClick={() => {setIdMetric(0); setValue('')}}>AGE</Button>
+          <Button color={"var(--white)"} bg="var(--key-background-red)"  bdbox="var(--key-shadow-dark-red)" onClick={() => changeInput(0)}>AGE</Button>
           : 
-          <Button  onClick={() => {setIdMetric(0); setValue('')}}>AGE</Button>
+          <Button  onClick={() => changeInput(0)}>AGE</Button>
           }
 
           <Button onClick={() => value.length <= 12 && setValue(value + "1")}>1</Button>
@@ -181,9 +252,9 @@ function App() {
           <Button onClick={() => value.length <= 12 && setValue(value + "3")}>3</Button>
         
           {idMetric === 1 ? 
-          <Button size="0.8rem" color={"var(--white)"} bg="var(--key-background-red)"  bdbox="var(--key-shadow-dark-red)" onClick={() => {setIdMetric(1); setValue('')}}>WEIGHT</Button>
+          <Button size="0.8rem" color={"var(--white)"} bg="var(--key-background-red)"  bdbox="var(--key-shadow-dark-red)" onClick={() => changeInput(1)}>WEIGHT</Button>
           : 
-          <Button size="0.8rem"  onClick={() => {setIdMetric(1); setValue('')}}>WEIGHT</Button>
+          <Button size="0.8rem"  onClick={() => changeInput(1)}>WEIGHT</Button>
           }
 
           <Button onClick={() => value.length >= 1 && addSimbol(".")}>.</Button>
@@ -192,9 +263,9 @@ function App() {
 
           
           {idMetric === 2 ? 
-          <Button size="0.8rem" color={"var(--white)"} bg="var(--key-background-red)"  bdbox="var(--key-shadow-dark-red)" onClick={() => {setIdMetric(2); setValue('')}}>HEIGHT</Button>
+          <Button size="0.8rem" color={"var(--white)"} bg="var(--key-background-red)"  bdbox="var(--key-shadow-dark-red)" onClick={() => changeInput(2)}>HEIGHT</Button>
           : 
-          <Button size="0.8rem"  onClick={() => {setIdMetric(2); setValue('')}}>HEIGHT</Button>
+          <Button size="0.8rem"   onClick={() => changeInput(2)}>HEIGHT</Button>
           }
 
           <Button
@@ -202,7 +273,7 @@ function App() {
             color="var(--white)"
             bg="var(--key-background-dark-blue)"
             bdbox="var(--key-shadow-dark-blue)"
-            onClick={() => setValue("")}
+            onClick={() => resect()}
           >
             RESET
           </Button>
