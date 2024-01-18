@@ -128,7 +128,7 @@ function App() {
       aux.height = "0";
     } 
     
-    if(theme === 1){//decimal => imperial
+    if(theme === 1){//decimal => imperial - rubens
         aux.weight = (2.20462 * parseFloat(aux.weight)).toFixed(2).toString();
         aux.height = (parseFloat(aux.height)/2.54).toFixed(2).toString();
     }else if(theme === 2){//imperial => decimal
