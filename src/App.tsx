@@ -52,11 +52,7 @@ function App() {
     }
 
     return (
-      (((10 * weight + 6.25 * parseFloat(height)) -
-        10 * parseFloat(person.age) +
-        5) *
-        factor
-      ).toString()
+      ((((10 * weight) + (6.25 * height)) - 10 * parseFloat(person.age) + 5) * factor ).toString()
     );
   };
 
